@@ -45,8 +45,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 uint8_t Message[32];
-uint8_t lenght;
 
+uint8_t Buffer[32];
 
 
 /* USER CODE END PV */
@@ -101,9 +101,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  UartLog ("Hello World\n\r");
+	  HAL_UART_Receive(&huart2, Buffer,1, 10); // if you change timeout you can see that this function block the code
+	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	  HAL_Delay(100);
 
-	  HAL_Delay(2000);
+
+	  //UartLog ("Hello World\n\r");
+	  //HAL_Delay(2000);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
