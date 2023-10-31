@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,6 +44,10 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+uint8_t Message[32];
+uint8_t lenght;
+
+
 
 /* USER CODE END PV */
 
@@ -51,7 +56,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-
+void UartLog (char* Message);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -96,6 +101,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  UartLog ("Hello World\n\r");
+
+	  HAL_Delay(2000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -220,7 +228,10 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void UartLog (char* Message)
+{
+	HAL_UART_Transmit(&huart2, (uint8_t*)Message, strlen(Message), 1000 );
+}
 /* USER CODE END 4 */
 
 /**
