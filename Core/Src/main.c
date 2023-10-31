@@ -44,9 +44,9 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t Message[32];
-
-uint8_t Buffer[32];
+uint8_t Message[16];
+uint8_t Length;
+uint8_t Buffer[16];
 
 
 /* USER CODE END PV */
@@ -55,8 +55,9 @@ uint8_t Buffer[32];
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-void UartLog (char* Message);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -93,21 +94,21 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-  /* USER CODE BEGIN 2 */
 
+  /* Initialize interrupts */
+  MX_NVIC_Init();
+  /* USER CODE BEGIN 2 */
+  HAL_UART_Receive_IT(&huart2, Buffer, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_UART_Receive(&huart2, Buffer,1, 10); // if you change timeout you can see that this function block the code
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(100);
+//	  Length=sprintf((char*)Message,"Hello World\n\r");
+//	  HAL_UART_Transmit_IT(&huart2, Message, Length);
+	  HAL_Delay(1000);
 
-
-	  //UartLog ("Hello World\n\r");
-	  //HAL_Delay(2000);
 
     /* USER CODE END WHILE */
 
@@ -160,6 +161,17 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief NVIC Configuration.
+  * @retval None
+  */
+static void MX_NVIC_Init(void)
+{
+  /* USART2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(USART2_IRQn);
 }
 
 /**
@@ -233,10 +245,22 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void UartLog (char* Message)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-	HAL_UART_Transmit(&huart2, (uint8_t*)Message, strlen(Message), 1000 );
+	if(huart->Instance == USART2)
+	{
+
+	}
 }
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if(huart->Instance == USART2)
+		{
+		  HAL_UART_Receive_IT(&huart2, Buffer, 1);
+		}
+}
+
 /* USER CODE END 4 */
 
 /**
