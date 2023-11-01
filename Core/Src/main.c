@@ -21,6 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "RingBuffer.h"
+
 #include <stdio.h>
 #include <string.h>
 /* USER CODE END Includes */
@@ -44,9 +46,7 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t Message[16];
-uint8_t Length;
-uint8_t Buffer[16];
+RingBuffer_t RingBuffer;
 
 
 /* USER CODE END PV */
@@ -57,7 +57,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -98,16 +98,31 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart2, Buffer, 1);
+
+  //just for check what happend in debug
+  uint8_t i=0;
+  for(i=0; i<4; i++)
+  {
+	  RB_Write (&RingBuffer, i);
+  }
+  //
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  Length=sprintf((char*)Message,"Hello World\n\r");
-//	  HAL_UART_Transmit_IT(&huart2, Message, Length);
-	  HAL_Delay(1000);
+
+	  //just for check what happend in debug
+	  uint8_t tmp;
+	  for(i=0; i<2; i++)
+	   {
+	 	  RB_Read(&RingBuffer, &tmp);
+	   }
+
+	  RB_Flush(&RingBuffer);
+	  //
 
 
     /* USER CODE END WHILE */
@@ -245,21 +260,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-	{
 
-	}
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if(huart->Instance == USART2)
-		{
-		  HAL_UART_Receive_IT(&huart2, Buffer, 1);
-		}
-}
 
 /* USER CODE END 4 */
 
