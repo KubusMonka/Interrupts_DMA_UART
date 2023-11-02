@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+
 #include "main.h"
 #include "usart.h"
 #include "gpio.h"
@@ -24,9 +25,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "RingBuffer.h"
-#include "SimpleParse.h"
+#include "ComplexParse.h"
 #include "stdio.h"
 #include "string.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -51,7 +53,7 @@ RingBuffer_t RingBuffer;
 uint8_t ReceiveTmp;
 uint8_t ReceivedLines;
 
-uint8_t ReceivedData[32];
+uint8_t ReceivedData[RINGBUFFER_SIZE];
 
 /* USER CODE END PV */
 
@@ -59,7 +61,7 @@ uint8_t ReceivedData[32];
 void SystemClock_Config(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
-
+void UartLog(char* Message);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -187,10 +189,13 @@ static void MX_NVIC_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-//void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-//{
-//	HAL_UART_Transmit_IT(&huart2, RB_Write(&RingBuffer, 1), 1);
-//}
+
+void UartLog(char* Message)
+{
+	HAL_UART_Transmit(&huart2, (uint8_t*)Message, strlen(Message), 1000);
+}
+
+
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {

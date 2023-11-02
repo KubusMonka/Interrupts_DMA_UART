@@ -2,12 +2,12 @@
  *      Author: jmonk
  */
 
-#ifndef INC_SIMPLEPARSE_H_
-#define INC_SIMPLEPARSE_H_
+#ifndef INC_COMPLEXPARSE_H_
+#define INC_COMPLEXPARSE_H_
 
 #define ENDLINE '\n'
 
 void Parser_TakeLine(RingBuffer_t *Buffer, uint8_t ReceivedData[]);
 void Strcmp_Parse(uint8_t *DataToParse);
 
-#endif /* INC_SIMPLEPARSE_H_ */
+#endif /* INC_COMPLEXPARSE_H_ */
