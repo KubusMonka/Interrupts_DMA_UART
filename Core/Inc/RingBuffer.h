@@ -19,7 +19,7 @@ typedef struct
 
 	uint16_t Head;
 	uint16_t Tail;
-	uint8_t Buffer[RINGBUFFER_SIZE];
+	uint8_t BufferArray[RINGBUFFER_SIZE];
 
 
 }RingBuffer_t;

@@ -10,7 +10,7 @@ RB_Status_t_e RB_Write (RingBuffer_t *Buffer, uint8_t Value)
 	{
 		return RB_ERROR;
 	}
-	Buffer-> Buffer[Buffer->Head] = Value;
+	Buffer-> BufferArray[Buffer->Head] = Value;
 	Buffer->Head = HeadTmp;
 	return RB_OK;
 }
@@ -21,7 +21,7 @@ RB_Status_t_e RB_Read (RingBuffer_t *Buffer, uint8_t *Value)
 	{
 		return RB_ERROR;
 	}
-	*Value = Buffer-> Buffer[Buffer->Tail];
+	*Value = Buffer-> BufferArray[Buffer->Tail];
 	Buffer->Tail =(Buffer->Tail+1)% RINGBUFFER_SIZE;
 
 	return RB_OK;

@@ -17,8 +17,8 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
-
 #include "main.h"
+#include "dma.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -50,10 +50,20 @@
 
 /* USER CODE BEGIN PV */
 RingBuffer_t RingBuffer;
-uint8_t ReceiveTmp;
+
+
+//uint8_t ReceiveTmp;
+//uint8_t ReceivedLines;
+
+uint8_t ReceivedDataFromDMA[RINGBUFFER_SIZE/2];
 uint8_t ReceivedLines;
 
 uint8_t ReceivedData[RINGBUFFER_SIZE];
+
+//just wanted to send something by UART_Transmit_DMA
+//uint8_t Messageee[32];
+//uint16_t Length;
+
 
 /* USER CODE END PV */
 
@@ -97,22 +107,33 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-HAL_UART_Receive_IT(&huart2,&ReceiveTmp, 1);
+//HAL_UART_Receive_IT(&huart2,&ReceiveTmp, 1); //delete - now i am using DMA
 
 
+//Length = sprintf((char*)Messageee, "Hello World");
+
+  //HAL_UARTEx_ReceiveToIdle_DMA(&huart2, pData, Size)
+
+HAL_UARTEx_ReceiveToIdle_DMA(&huart2, ReceivedDataFromDMA,RINGBUFFER_SIZE/2 );
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+//just wanted to send something by UART_Transmit_DMA
+//	  HAL_UART_Transmit_DMA(&huart2,Messageee, Length);
+
 	  if(ReceivedLines > 0)
 	  {
+
 
 		  Parser_TakeLine(&RingBuffer, ReceivedData );
 
@@ -183,41 +204,70 @@ void SystemClock_Config(void)
   */
 static void MX_NVIC_Init(void)
 {
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
   /* USART2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(USART2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(USART2_IRQn);
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
 }
 
 /* USER CODE BEGIN 4 */
 
 void UartLog(char* Message)
 {
-	HAL_UART_Transmit(&huart2, (uint8_t*)Message, strlen(Message), 1000);
+	HAL_UART_Transmit_DMA( &huart2,(uint8_t*)Message, strlen(Message) );
+	//HAL_UART_Transmit(&huart2, (uint8_t*)Message, strlen(Message), 1000);
 }
 
-
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
 	if (huart->Instance == USART2)
 	{
-
-//		RB_Write(&RingBuffer, ReceiveTmp);
-		if(RB_OK == RB_Write(&RingBuffer, ReceiveTmp))
+		for (uint8_t i =0; i<Size; i++)
 		{
-			if (ReceiveTmp == ENDLINE)
+			if(RB_OK == RB_Write(&RingBuffer, ReceivedDataFromDMA[i]))
+			{}
+			else
+			{
+				RB_Flush(&RingBuffer);
+			}
+
+
+			if (ReceivedDataFromDMA[i] == ENDLINE)
 			{
 				ReceivedLines++;
 			}
-		}else
-		{
-			RB_Flush(&RingBuffer);
 		}
 
-		HAL_UART_Receive_IT(&huart2,&ReceiveTmp, 1);
+		HAL_UARTEx_ReceiveToIdle_DMA(&huart2, ReceivedDataFromDMA,RINGBUFFER_SIZE/2 );
 	}
-
 }
+
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//	if (huart->Instance == USART2)
+//	{
+//
+////		RB_Write(&RingBuffer, ReceiveTmp);
+//		if(RB_OK == RB_Write(&RingBuffer, ReceiveTmp))
+//		{
+//			if (ReceiveTmp == ENDLINE)
+//			{
+//				ReceivedLines++;
+//			}
+//		}else
+//		{
+//			RB_Flush(&RingBuffer);
+//		}
+//
+//		HAL_UART_Receive_IT(&huart2,&ReceiveTmp, 1);
+//	}
+//
+//}
 /* USER CODE END 4 */
 
 /**
